@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code For your data</title>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script> -->
+     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="icon" href="https://i.ibb.co/gZ3ch10d/nw-1-modified.png" type="image/x-icon">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #2d3748;
+            --bg-secondary: #4a5568;
+            --bg-card: #1a202c;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --accent: #68d391;
+            --accent-hover: #48bb78;
+            --border: #4a5568;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f7fafc;
+            --bg-secondary: #edf2f7;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --accent: #3182ce;
+            --accent-hover: #2c5282;
+            --border: #e2e8f0;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--bg-card);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .theme-toggle {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-hover);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .profile-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px var(--shadow);
+            text-align: center;
+            position: sticky;
+            top: 100px;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 4px solid var(--accent);
+            object-fit: cover;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--accent);
+        }
+
+        .profile-name {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .profile-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .main-content {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 120px;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .links-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .link-item {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .link-text {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            flex: 1;
+            margin-right: 1rem;
+            word-break: break-all;
+        }
+
+        .qr-container {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .qr-code {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 1rem 0;
+        }
+
+        .toast {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            background: var(--accent);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px var(--shadow);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: #e53e3e;
+        }
+
+        .export-import {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 1rem;
+            }
+
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                display: none;
+            }
+
+            .profile-card {
+                position: static;
+            }
+
+            .toast {
+                right: 1rem;
+                left: 1rem;
+                transform: translateY(-100px);
+            }
+
+            .toast.show {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><a href="https://ankit-bcawala.web.app/" target="_blank" style="color: inherit; text-decoration: none; cursor: pointer;">QR-Gen</a></div>
+        <div class="nav-links">
+            <a href="https://ankit-bcawala.web.app/" target="_blank" style="color: inherit; text-decoration: none; cursor: pointer;">Contact Admin</a>
+            <button class="theme-toggle" id="themeToggle">
+                <span id="themeIcon">🌙</span>
+                <span id="themeText">Dark</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-image"><a href="https://ankit-bcawala.web.app/" target="_blank">👤</a></div>
+            <h2 class="profile-name">Data Manager</h2>
+            <p class="profile-title">Simple Data Storage System</p>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                When you Create a link than you get a two links.
+                Please dont share editable link to anyone.
+                Public link or View link is for everyone 
+            </p>
+        </div>
+
+        <div class="main-content">
+            <h2 class="section-title" id="pageTitle">Create New Entry</h2>
+            
+            <form id="dataForm">
+                <div class="form-group">
+                    <label for="title">Title *</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description *</label>
+                    <textarea id="description" name="description" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="number">Number</label>
+                    <input type="number" id="number" name="number">
+                </div>
+
+                <div class="form-group">
+                    <label for="fileUrl">File URL (optional)</label>
+                    <input type="url" id="fileUrl" name="fileUrl" placeholder="https://example.com/file.pdf">
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">Create Entry</button>
+            </form>
+
+            <div id="resultContainer" class="links-container hidden">
+                <h3 style="margin-bottom: 1rem; color: var(--accent);">Entry Created Successfully!</h3>
+                
+                <div class="link-item">
+                    <div>
+                        <strong>View Link (Public):</strong>
+                        <div class="link-text" id="viewLink"></div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="copyToClipboard('viewLink')">Copy</button>
+                </div>
+
+                <div class="link-item">
+                    <div>
+                        <strong>Edit Link (Secret - Keep Safe!):</strong>
+                        <div class="link-text" id="editLink"></div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="copyToClipboard('editLink')">Copy</button>
+                </div>
+
+                <div class="qr-container">
+                    <h4 style="color: var(--accent); margin-bottom: 1rem;">QR Code for View Link:</h4>
+                    <div id="qrcode" class="qr-code"></div>
+                    <button class="btn" id="downloadQR">Download QR Code</button>
+                </div>
+            </div>
+
+            <div class="export-import">
+                <button class="btn btn-secondary" onclick="exportData()">Export Data</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">Import Data</button>
+                <button class="btn btn-secondary" onclick="clearAllData()">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <script>
+        // Theme Management
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            if (theme === 'light') {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark';
+            } else {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light';
+            }
+        }
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        });
+
+        // Data Management
+        let isEditing = false;
+        let editingId = null;
+
+        function generateId() {
+            return 'id' + Date.now() + Math.random().toString(36).substr(2, 9);
+        }
+
+        function generateToken() {
+            return 'token' + Date.now() + Math.random().toString(36).substr(2, 16);
+        }
+
+        function getData() {
+            const data = localStorage.getItem('portfolioData');
+            return data ? JSON.parse(data) : {};
+        }
+
+        function saveData(data) {
+            localStorage.setItem('portfolioData', JSON.stringify(data));
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${isError ? 'error' : ''}`;
+            
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Link copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy link', true);
+            });
+        }
+
+        // Check for edit mode
+        function checkEditMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('edit');
+            const token = urlParams.get('token');
+
+            if (editId && token) {
+                const data = getData();
+                const entry = data[editId];
+
+                if (entry && entry.editToken === token) {
+                    isEditing = true;
+                    editingId = editId;
+                    
+                    // Update UI for editing
+                    document.getElementById('pageTitle').textContent = 'Edit Entry';
+                    document.getElementById('submitBtn').textContent = 'Update Entry';
+                    
+                    // Prefill form
+                    document.getElementById('title').value = entry.title || '';
+                    document.getElementById('description').value = entry.description || '';
+                    document.getElementById('number').value = entry.number || '';
+                    document.getElementById('fileUrl').value = entry.fileUrl || '';
+                    
+                    showToast('Edit mode activated');
+                } else {
+                    showToast('Invalid edit link or token', true);
+                }
+            }
+        }
+
+        // Form submission
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            console.log('Form submitted'); // Debug log
+            
+            try {
+                const formData = new FormData(e.target);
+                const title = formData.get('title');
+                const description = formData.get('description');
+                const number = formData.get('number');
+                const fileUrl = formData.get('fileUrl');
+
+                console.log('Form data:', { title, description, number, fileUrl }); // Debug log
+
+                if (!title || title.trim() === '' || !description || description.trim() === '') {
+                    showToast('Title and description are required', true);
+                    return;
+                }
+
+                const data = getData();
+                const now = new Date().toISOString();
+                
+                let id, token;
+                
+                if (isEditing) {
+                    id = editingId;
+                    token = data[id].editToken;
+                    data[id] = {
+                        ...data[id],
+                        title: title.trim(),
+                        description: description.trim(),
+                        number: number && number !== '' ? parseFloat(number) : null,
+                        fileUrl: fileUrl && fileUrl.trim() !== '' ? fileUrl.trim() : null,
+                        updatedAt: now
+                    };
+                    showToast('Entry updated successfully!');
+                } else {
+                    id = generateId();
+                    token = generateToken();
+                    
+                    data[id] = {
+                        title: title.trim(),
+                        description: description.trim(),
+                        number: number && number !== '' ? parseFloat(number) : null,
+                        fileUrl: fileUrl && fileUrl.trim() !== '' ? fileUrl.trim() : null,
+                        editToken: token,
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    showToast('Entry created successfully!');
+                }
+
+                saveData(data);
+                console.log('Data saved:', data[id]); // Debug log
+                
+                // Show result
+                displayResult(id, token);
+                
+                // Reset form if not editing
+                if (!isEditing) {
+                    document.getElementById('dataForm').reset();
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                showToast('Error creating entry: ' + error.message, true);
+            }
+        }
+
+        // Add event listener
+        document.getElementById('dataForm').addEventListener('submit', handleFormSubmit);
+
+        function displayResult(id, token) {
+            try {
+                console.log('Displaying result for:', id, token); // Debug log
+                
+                const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+                const viewLink = `${baseUrl}view.html?id=${id}`;
+                const editLink = `${baseUrl}?edit=${id}&token=${token}`;
+
+                console.log('Generated links:', { viewLink, editLink }); // Debug log
+
+                document.getElementById('viewLink').textContent = viewLink;
+                document.getElementById('editLink').textContent = editLink;
+                document.getElementById('resultContainer').classList.remove('hidden');
+
+                // Generate QR Code
+                const qrContainer = document.getElementById('qrcode');
+                qrContainer.innerHTML = '';
+                
+               if (typeof QRCode !== 'undefined') {
+        try {
+            // अगर qrcode.js (v1.0.0 वाला) use कर रहे हो तो ये काम करेगा
+            new QRCode(qrContainer, {
+                text: viewLink,
+                width: 200,
+                height: 200
+            });
+            console.log("QR Code generated successfully");
+        } catch (error) {
+            console.error("QR Code generation error:", error);
+            qrContainer.innerHTML = '<p style="color: var(--text-secondary);">QR Code generation failed</p>';
+        }
+    } else {
+        console.error("QRCode library not loaded");
+        qrContainer.innerHTML = '<p style="color: var(--text-secondary);">QR Code library not loaded</p>';
+    }
+
+                // Download QR Code
+                document.getElementById('downloadQR').onclick = function() {
+                    if (typeof QRCode !== 'undefined') {
+                        QRCode.toDataURL(viewLink, { 
+                            width: 400,
+                            height: 400,
+                            margin: 2
+                        }, (error, url) => {
+                            if (error) {
+                                console.error('QR Code download error:', error);
+                                showToast('Failed to generate QR code for download', true);
+                                return;
+                            }
+                            
+                            const link = document.createElement('a');
+                            link.download = `qr-code-${id}.png`;
+                            link.href = url;
+                            link.click();
+                            showToast('QR code downloaded!');
+                        });
+                    } else {
+                        showToast('QR Code library not available', true);
+                    }
+                };
+                
+                // Scroll to results
+                document.getElementById('resultContainer').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                
+            } catch (error) {
+                console.error('Display result error:', error);
+                showToast('Error displaying results: ' + error.message, true);
+            }
+        }
+
+        // Data export/import
+        function exportData() {
+            const data = getData();
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.download = `portfolio-data-${new Date().toISOString().split('T')[0]}.json`;
+            link.href = url;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showToast('Data exported successfully!');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    const currentData = getData();
+                    const mergedData = { ...currentData, ...importedData };
+                    saveData(mergedData);
+                    showToast('Data imported successfully!');
+                } catch (error) {
+                    showToast('Invalid JSON file', true);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                localStorage.removeItem('portfolioData');
+                showToast('All data cleared');
+                location.reload();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded'); // Debug log
+            checkEditMode();
+            
+            // Test button click
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                console.log('Submit button found');
+                submitBtn.addEventListener('click', function(e) {
+                    console.log('Submit button clicked directly'); // Debug log
+                });
+            } else {
+                console.error('Submit button not found');
+            }
+            
+            // Test form submission
+            const form = document.getElementById('dataForm');
+            if (form) {
+                console.log('Form found');
+            } else {
+                console.error('Form not found');
+            }
+        });
+    </script>
+</body>
+</html>
