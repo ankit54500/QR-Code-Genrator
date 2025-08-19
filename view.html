@@ -62,6 +62,7 @@
             font-size: 1.5rem;
             font-weight: bold;
             color: var(--accent);
+            text-decoration: none;
         }
 
         .nav-links {
@@ -118,6 +119,7 @@
             font-weight: bold;
             color: var(--accent);
             margin-bottom: 1rem;
+            word-break: break-word;
         }
 
         .entry-meta {
@@ -134,6 +136,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.25rem;
+            min-width: 120px;
         }
 
         .meta-label {
@@ -147,6 +150,7 @@
         .meta-value {
             font-weight: 500;
             color: var(--text-primary);
+            word-break: break-word;
         }
 
         .description {
@@ -158,6 +162,8 @@
             background: var(--bg-secondary);
             border-radius: 10px;
             border-left: 4px solid var(--accent);
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
         .file-link {
@@ -172,6 +178,7 @@
             border-radius: 25px;
             transition: all 0.3s ease;
             margin-bottom: 2rem;
+            word-break: break-all;
         }
 
         .file-link:hover {
@@ -202,9 +209,15 @@
             gap: 0.5rem;
         }
 
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             background: var(--accent-hover);
             transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: var(--bg-secondary);
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn-secondary {
@@ -213,7 +226,7 @@
             border: 2px solid var(--border);
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:hover:not(:disabled) {
             background: var(--border);
         }
 
@@ -242,6 +255,7 @@
             font-size: 1.1rem;
             color: var(--text-secondary);
             margin-bottom: 2rem;
+            line-height: 1.5;
         }
 
         .loading {
@@ -262,6 +276,11 @@
             animation: spin 1s linear infinite;
         }
 
+        .loading-text {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -279,6 +298,8 @@
             transform: translateX(400px);
             transition: transform 0.3s ease;
             z-index: 1000;
+            max-width: 300px;
+            word-wrap: break-word;
         }
 
         .toast.show {
@@ -300,10 +321,20 @@
 
             .navbar {
                 padding: 1rem;
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
             }
 
             .nav-links a {
                 display: none;
+            }
+
+            .entry-title {
+                font-size: 2rem;
             }
 
             .entry-meta {
@@ -311,30 +342,53 @@
                 gap: 1rem;
             }
 
+            .meta-item {
+                min-width: auto;
+            }
+
             .actions {
                 flex-direction: column;
+            }
+
+            .file-link {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
             }
 
             .toast {
                 right: 1rem;
                 left: 1rem;
                 transform: translateY(-100px);
+                max-width: none;
             }
 
             .toast.show {
                 transform: translateY(0);
             }
         }
+
+        @media (max-width: 480px) {
+            .entry-title {
+                font-size: 1.5rem;
+            }
+
+            .description {
+                font-size: 1rem;
+                padding: 1rem;
+            }
+
+            .entry-card {
+                padding: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="logo">Portfolio</div>
+        <a href="index.html" class="logo">QR-Gen</a>
         <div class="nav-links">
             <a href="index.html">Home</a>
-            <a href="#about">About</a>
-            <a href="#projects">Projects</a>
-            <a href="#contact">Contact</a>
+            <a href="https://ankit-bcawala.web.app/" target="_blank">Contact</a>
             <button class="theme-toggle" id="themeToggle">
                 <span id="themeIcon">🌙</span>
                 <span id="themeText">Dark</span>
@@ -345,7 +399,7 @@
     <div class="container">
         <div id="loadingContainer" class="loading">
             <div class="spinner"></div>
-            <p>Loading entry...</p>
+            <p class="loading-text">Loading entry...</p>
         </div>
 
         <div id="entryContainer" class="hidden">
@@ -370,7 +424,7 @@
                 <div class="description" id="entryDescription"></div>
 
                 <div id="fileContainer" style="display: none;">
-                    <a href="#" id="fileLink" class="file-link" target="_blank">
+                    <a href="#" id="fileLink" class="file-link" target="_blank" rel="noopener noreferrer">
                         📄 View Attached File
                     </a>
                 </div>
@@ -400,6 +454,8 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        console.log('View page script starting...');
+
         // Theme Management
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
@@ -422,87 +478,173 @@
         const savedTheme = localStorage.getItem('theme') || 'dark';
         setTheme(savedTheme);
 
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            setTheme(newTheme);
-        });
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                setTheme(newTheme);
+            });
+        }
 
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast show ${isError ? 'error' : ''}`;
-            
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 3000);
+            if (toast) {
+                toast.textContent = message;
+                toast.className = `toast show ${isError ? 'error' : ''}`;
+                
+                setTimeout(() => {
+                    toast.className = 'toast';
+                }, 3000);
+            }
         }
 
         function getData() {
-            const data = localStorage.getItem('portfolioData');
-            return data ? JSON.parse(data) : {};
+            try {
+                const data = localStorage.getItem('portfolioData');
+                return data ? JSON.parse(data) : {};
+            } catch (error) {
+                console.error('Error reading data:', error);
+                return {};
+            }
         }
 
         function formatDate(dateString) {
-            return new Date(dateString).toLocaleString();
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) {
+                    return 'Invalid Date';
+                }
+                return date.toLocaleString();
+            } catch (error) {
+                console.error('Date formatting error:', error);
+                return 'Unknown Date';
+            }
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
         }
 
         let currentEntry = null;
         let generatedPdf = null;
 
         function loadEntry() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const entryId = urlParams.get('id');
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const entryId = urlParams.get('id');
 
-            if (!entryId) {
-                showError();
-                return;
+                console.log('Loading entry with ID:', entryId);
+
+                if (!entryId) {
+                    console.error('No entry ID provided');
+                    showError('No entry ID provided in URL');
+                    return;
+                }
+
+                const data = getData();
+                console.log('Available data keys:', Object.keys(data));
+                
+                const entry = data[entryId];
+
+                if (!entry) {
+                    console.error('Entry not found for ID:', entryId);
+                    showError('Entry not found');
+                    return;
+                }
+
+                console.log('Entry found:', entry);
+                currentEntry = entry;
+                displayEntry(entry);
+
+            } catch (error) {
+                console.error('Error loading entry:', error);
+                showError('Error loading entry: ' + error.message);
             }
-
-            const data = getData();
-            const entry = data[entryId];
-
-            if (!entry) {
-                showError();
-                return;
-            }
-
-            currentEntry = entry;
-            displayEntry(entry);
         }
 
         function displayEntry(entry) {
-            // Hide loading, show entry
-            document.getElementById('loadingContainer').classList.add('hidden');
-            document.getElementById('entryContainer').classList.remove('hidden');
+            try {
+                console.log('Displaying entry:', entry);
 
-            // Fill in the data
-            document.getElementById('entryTitle').textContent = entry.title;
-            document.getElementById('entryDescription').textContent = entry.description;
-            document.getElementById('entryCreated').textContent = formatDate(entry.createdAt);
-            document.getElementById('entryUpdated').textContent = formatDate(entry.updatedAt);
+                // Hide loading, show entry
+                document.getElementById('loadingContainer').classList.add('hidden');
+                document.getElementById('entryContainer').classList.remove('hidden');
 
-            // Show number if exists
-            if (entry.number !== null && entry.number !== undefined && entry.number !== '') {
-                document.getElementById('entryNumber').textContent = entry.number;
-                document.getElementById('numberMeta').style.display = 'block';
-            }
+                // Fill in the data with proper escaping
+                const titleEl = document.getElementById('entryTitle');
+                const descriptionEl = document.getElementById('entryDescription');
+                const createdEl = document.getElementById('entryCreated');
+                const updatedEl = document.getElementById('entryUpdated');
+                const numberEl = document.getElementById('entryNumber');
+                const numberMetaEl = document.getElementById('numberMeta');
 
-            // Show file link if exists
-            if (entry.fileUrl) {
-                document.getElementById('fileLink').href = entry.fileUrl;
-                document.getElementById('fileContainer').style.display = 'block';
+                if (titleEl) titleEl.textContent = entry.title || 'Untitled';
+                if (descriptionEl) descriptionEl.textContent = entry.description || 'No description';
+                if (createdEl) createdEl.textContent = formatDate(entry.createdAt);
+                if (updatedEl) updatedEl.textContent = formatDate(entry.updatedAt);
+
+                // Show number if exists and is valid
+                if (entry.number !== null && entry.number !== undefined && entry.number !== '') {
+                    if (numberEl) numberEl.textContent = entry.number;
+                    if (numberMetaEl) numberMetaEl.style.display = 'block';
+                }
+
+                // Show file link if exists and is valid URL
+                if (entry.fileUrl && isValidUrl(entry.fileUrl)) {
+                    const fileLinkEl = document.getElementById('fileLink');
+                    const fileContainerEl = document.getElementById('fileContainer');
+                    
+                    if (fileLinkEl && fileContainerEl) {
+                        fileLinkEl.href = entry.fileUrl;
+                        fileContainerEl.style.display = 'block';
+                        
+                        // Add click tracking
+                        fileLinkEl.addEventListener('click', function() {
+                            console.log('File link clicked:', entry.fileUrl);
+                        });
+                    }
+                }
+
+                console.log('Entry displayed successfully');
+
+            } catch (error) {
+                console.error('Error displaying entry:', error);
+                showError('Error displaying entry: ' + error.message);
             }
         }
 
-        function showError() {
+        function showError(message = 'Unknown error occurred') {
+            console.log('Showing error:', message);
+            
             document.getElementById('loadingContainer').classList.add('hidden');
+            document.getElementById('entryContainer').classList.add('hidden');
             document.getElementById('errorContainer').classList.remove('hidden');
+            
+            // Update error message if provided
+            const errorMessageEl = document.querySelector('.error-message');
+            if (errorMessageEl && message !== 'Unknown error occurred') {
+                errorMessageEl.textContent = message;
+            }
         }
 
         // PDF Generation
-        document.getElementById('generatePdfBtn').addEventListener('click', generatePDF);
-        document.getElementById('downloadPdfBtn').addEventListener('click', downloadPDF);
+        function setupPDFGeneration() {
+            const generateBtn = document.getElementById('generatePdfBtn');
+            const downloadBtn = document.getElementById('downloadPdfBtn');
+
+            if (generateBtn) {
+                generateBtn.addEventListener('click', generatePDF);
+            }
+
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', downloadPDF);
+            }
+        }
 
         function generatePDF() {
             if (!currentEntry) {
@@ -510,14 +652,27 @@
                 return;
             }
 
+            const generateBtn = document.getElementById('generatePdfBtn');
+            const originalText = generateBtn ? generateBtn.textContent : '';
+            
             try {
+                if (generateBtn) {
+                    generateBtn.disabled = true;
+                    generateBtn.textContent = '⏳ Generating...';
+                }
+
+                // Check if jsPDF is available
+                if (typeof window.jspdf === 'undefined') {
+                    throw new Error('PDF library not loaded');
+                }
+
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
                 // Set up fonts and colors
                 doc.setFontSize(20);
                 doc.setTextColor(104, 211, 145); // Accent color
-                doc.text(currentEntry.title, 20, 30);
+                doc.text(currentEntry.title || 'Untitled', 20, 30);
 
                 // Add meta information
                 doc.setFontSize(10);
@@ -531,7 +686,7 @@
 
                 doc.text(`Created: ${formatDate(currentEntry.createdAt)}`, 20, yPos);
                 yPos += 10;
-                doc.text(`Updated: ${formatDate(currentEntry.updatedAt)}`, yPos += 10, yPos);
+                doc.text(`Updated: ${formatDate(currentEntry.updatedAt)}`, 20, yPos);
                 yPos += 20;
 
                 // Add description
@@ -539,26 +694,42 @@
                 doc.setTextColor(0, 0, 0);
                 
                 // Split long text into multiple lines
-                const splitDescription = doc.splitTextToSize(currentEntry.description, 170);
+                const description = currentEntry.description || 'No description';
+                const splitDescription = doc.splitTextToSize(description, 170);
                 doc.text(splitDescription, 20, yPos);
                 yPos += splitDescription.length * 7 + 20;
 
                 // Add file URL if exists
-                if (currentEntry.fileUrl) {
+                if (currentEntry.fileUrl && isValidUrl(currentEntry.fileUrl)) {
                     doc.setFontSize(10);
                     doc.setTextColor(49, 130, 206); // Blue color for links
                     doc.text('Attached File:', 20, yPos);
                     yPos += 10;
-                    doc.text(currentEntry.fileUrl, 20, yPos);
+                    
+                    // Split URL if too long
+                    const splitUrl = doc.splitTextToSize(currentEntry.fileUrl, 170);
+                    doc.text(splitUrl, 20, yPos);
                 }
 
                 generatedPdf = doc;
-                document.getElementById('downloadPdfBtn').style.display = 'inline-flex';
+                
+                // Show download button
+                const downloadBtn = document.getElementById('downloadPdfBtn');
+                if (downloadBtn) {
+                    downloadBtn.style.display = 'inline-flex';
+                }
+                
                 showToast('PDF generated successfully!');
+                console.log('PDF generated successfully');
 
             } catch (error) {
                 console.error('PDF generation error:', error);
-                showToast('Failed to generate PDF', true);
+                showToast('Failed to generate PDF: ' + error.message, true);
+            } finally {
+                if (generateBtn) {
+                    generateBtn.disabled = false;
+                    generateBtn.textContent = originalText;
+                }
             }
         }
 
@@ -568,19 +739,71 @@
                 return;
             }
 
+            if (!currentEntry) {
+                showToast('No entry data available', true);
+                return;
+            }
+
             try {
-                const filename = `${currentEntry.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${Date.now()}.pdf`;
+                const title = currentEntry.title || 'untitled';
+                const cleanTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const filename = `${cleanTitle}_${Date.now()}.pdf`;
+                
                 generatedPdf.save(filename);
                 showToast('PDF downloaded successfully!');
+                console.log('PDF downloaded:', filename);
+                
             } catch (error) {
                 console.error('PDF download error:', error);
-                showToast('Failed to download PDF', true);
+                showToast('Failed to download PDF: ' + error.message, true);
             }
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadEntry();
+        // Initialize application
+        function initializeApp() {
+            console.log('Initializing view page...');
+            
+            try {
+                // Setup PDF generation
+                setupPDFGeneration();
+                
+                // Load the entry
+                loadEntry();
+                
+                console.log('View page initialized successfully');
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError('Failed to initialize page: ' + error.message);
+            }
+        }
+
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded for view page');
+            initializeApp();
+        });
+
+        // Fallback initialization
+        window.addEventListener('load', function() {
+            console.log('Window loaded for view page');
+            // Only initialize if not already done
+            if (document.getElementById('loadingContainer') && !document.getElementById('loadingContainer').classList.contains('hidden')) {
+                console.log('Fallback initialization for view page');
+                initializeApp();
+            }
+        });
+
+        // Error handling for uncaught errors
+        window.addEventListener('error', function(event) {
+            console.error('Uncaught error:', event.error);
+            showToast('An unexpected error occurred', true);
+        });
+
+        // Handle unhandled promise rejections
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            showToast('An unexpected error occurred', true);
         });
     </script>
 </body>
