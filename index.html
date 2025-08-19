@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code For your data</title>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script> -->
-     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="icon" href="https://i.ibb.co/gZ3ch10d/nw-1-modified.png" type="image/x-icon">
 
@@ -214,6 +212,12 @@
             transform: translateY(-2px);
         }
 
+        .btn:disabled {
+            background: var(--bg-secondary);
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-secondary {
             background: var(--bg-secondary);
             color: var(--text-primary);
@@ -300,6 +304,31 @@
             display: none;
         }
 
+        .loading {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--bg-secondary);
+            border-top: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .container {
                 grid-template-columns: 1fr;
@@ -383,7 +412,13 @@
                     <input type="url" id="fileUrl" name="fileUrl" placeholder="https://example.com/file.pdf">
                 </div>
 
-                <button type="submit" class="btn" id="submitBtn">Create Entry</button>
+                <button type="submit" class="btn" id="submitBtn">
+                    <span id="submitText">Create Entry</span>
+                    <div class="loading" id="submitLoading">
+                        <div class="spinner"></div>
+                        Processing...
+                    </div>
+                </button>
             </form>
 
             <div id="resultContainer" class="links-container hidden">
@@ -421,9 +456,11 @@
         </div>
     </div>
 
-    
+    <div id="toast" class="toast"></div>
 
     <script>
+        console.log('Script starting...');
+        
         // Theme Management
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
@@ -455,6 +492,7 @@
         // Data Management
         let isEditing = false;
         let editingId = null;
+        let isSubmitting = false;
 
         function generateId() {
             return 'id' + Date.now() + Math.random().toString(36).substr(2, 9);
@@ -465,32 +503,77 @@
         }
 
         function getData() {
-            const data = localStorage.getItem('portfolioData');
-            return data ? JSON.parse(data) : {};
+            try {
+                const data = localStorage.getItem('portfolioData');
+                return data ? JSON.parse(data) : {};
+            } catch (error) {
+                console.error('Error reading data:', error);
+                return {};
+            }
         }
 
         function saveData(data) {
-            localStorage.setItem('portfolioData', JSON.stringify(data));
+            try {
+                localStorage.setItem('portfolioData', JSON.stringify(data));
+                return true;
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showToast('Failed to save data', true);
+                return false;
+            }
         }
 
         function showToast(message, isError = false) {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast show ${isError ? 'error' : ''}`;
-            
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, 3000);
+            if (toast) {
+                toast.textContent = message;
+                toast.className = `toast show ${isError ? 'error' : ''}`;
+                
+                setTimeout(() => {
+                    toast.className = 'toast';
+                }, 3000);
+            }
         }
 
         function copyToClipboard(elementId) {
             const element = document.getElementById(elementId);
+            if (!element) return;
+            
             const text = element.textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                showToast('Link copied to clipboard!');
-            }).catch(() => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Link copied to clipboard!');
+                }).catch(() => {
+                    // Fallback method
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('Link copied to clipboard!');
+                } else {
+                    showToast('Failed to copy link', true);
+                }
+            } catch (err) {
                 showToast('Failed to copy link', true);
-            });
+            }
+
+            document.body.removeChild(textArea);
         }
 
         // Check for edit mode
@@ -509,7 +592,7 @@
                     
                     // Update UI for editing
                     document.getElementById('pageTitle').textContent = 'Edit Entry';
-                    document.getElementById('submitBtn').textContent = 'Update Entry';
+                    document.getElementById('submitText').textContent = 'Update Entry';
                     
                     // Prefill form
                     document.getElementById('title').value = entry.title || '';
@@ -524,11 +607,35 @@
             }
         }
 
-        // Form submission
+        function setSubmitLoading(loading) {
+            isSubmitting = loading;
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const submitLoading = document.getElementById('submitLoading');
+
+            if (loading) {
+                submitBtn.disabled = true;
+                submitText.style.display = 'none';
+                submitLoading.classList.add('show');
+            } else {
+                submitBtn.disabled = false;
+                submitText.style.display = 'inline';
+                submitLoading.classList.remove('show');
+            }
+        }
+
+        // Form submission handler
         function handleFormSubmit(e) {
             e.preventDefault();
-            console.log('Form submitted'); // Debug log
-            
+            e.stopPropagation();
+
+            if (isSubmitting) {
+                return;
+            }
+
+            console.log('Form submission started');
+            setSubmitLoading(true);
+
             try {
                 const formData = new FormData(e.target);
                 const title = formData.get('title');
@@ -536,11 +643,24 @@
                 const number = formData.get('number');
                 const fileUrl = formData.get('fileUrl');
 
-                console.log('Form data:', { title, description, number, fileUrl }); // Debug log
+                console.log('Form data extracted:', { title, description, number, fileUrl });
 
-                if (!title || title.trim() === '' || !description || description.trim() === '') {
-                    showToast('Title and description are required', true);
-                    return;
+                // Validation
+                if (!title || title.trim() === '') {
+                    throw new Error('Title is required');
+                }
+
+                if (!description || description.trim() === '') {
+                    throw new Error('Description is required');
+                }
+
+                // URL validation
+                if (fileUrl && fileUrl.trim() !== '') {
+                    try {
+                        new URL(fileUrl.trim());
+                    } catch (urlError) {
+                        throw new Error('Please enter a valid URL');
+                    }
                 }
 
                 const data = getData();
@@ -548,9 +668,9 @@
                 
                 let id, token;
                 
-                if (isEditing) {
+                if (isEditing && editingId) {
                     id = editingId;
-                    token = data[id].editToken;
+                    token = data[id] ? data[id].editToken : generateToken();
                     data[id] = {
                         ...data[id],
                         title: title.trim(),
@@ -559,7 +679,7 @@
                         fileUrl: fileUrl && fileUrl.trim() !== '' ? fileUrl.trim() : null,
                         updatedAt: now
                     };
-                    showToast('Entry updated successfully!');
+                    console.log('Entry updated:', data[id]);
                 } else {
                     id = generateId();
                     token = generateToken();
@@ -573,94 +693,59 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    showToast('Entry created successfully!');
+                    console.log('New entry created:', data[id]);
                 }
 
-                saveData(data);
-                console.log('Data saved:', data[id]); // Debug log
-                
+                // Save data
+                const saveSuccess = saveData(data);
+                if (!saveSuccess) {
+                    throw new Error('Failed to save data to localStorage');
+                }
+
                 // Show result
                 displayResult(id, token);
                 
-                // Reset form if not editing
-                if (!isEditing) {
+                // Show success message
+                if (isEditing) {
+                    showToast('Entry updated successfully!');
+                } else {
+                    showToast('Entry created successfully!');
+                    // Reset form if not editing
                     document.getElementById('dataForm').reset();
                 }
+
             } catch (error) {
                 console.error('Form submission error:', error);
-                showToast('Error creating entry: ' + error.message, true);
+                showToast(error.message, true);
+            } finally {
+                setSubmitLoading(false);
             }
         }
 
-        // Add event listener
-        document.getElementById('dataForm').addEventListener('submit', handleFormSubmit);
-
         function displayResult(id, token) {
             try {
-                console.log('Displaying result for:', id, token); // Debug log
+                console.log('Displaying result for ID:', id);
                 
-                const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
-                const viewLink = `${baseUrl}view.html?id=${id}`;
-                const editLink = `${baseUrl}?edit=${id}&token=${token}`;
+                const baseUrl = window.location.origin + window.location.pathname.replace('/index.html', '').replace('index.html', '');
+                const viewLink = `${baseUrl}/view.html?id=${id}`;
+                const editLink = `${baseUrl}/?edit=${id}&token=${token}`;
 
-                console.log('Generated links:', { viewLink, editLink }); // Debug log
+                console.log('Generated links:', { viewLink, editLink });
 
                 document.getElementById('viewLink').textContent = viewLink;
                 document.getElementById('editLink').textContent = editLink;
                 document.getElementById('resultContainer').classList.remove('hidden');
 
                 // Generate QR Code
-                const qrContainer = document.getElementById('qrcode');
-                qrContainer.innerHTML = '';
-                
-               if (typeof QRCode !== 'undefined') {
-        try {
-            // अगर qrcode.js (v1.0.0 वाला) use कर रहे हो तो ये काम करेगा
-            new QRCode(qrContainer, {
-                text: viewLink,
-                width: 200,
-                height: 200
-            });
-            console.log("QR Code generated successfully");
-        } catch (error) {
-            console.error("QR Code generation error:", error);
-            qrContainer.innerHTML = '<p style="color: var(--text-secondary);">QR Code generation failed</p>';
-        }
-    } else {
-        console.error("QRCode library not loaded");
-        qrContainer.innerHTML = '<p style="color: var(--text-secondary);">QR Code library not loaded</p>';
-    }
-
-                // Download QR Code
-                document.getElementById('downloadQR').onclick = function() {
-                    if (typeof QRCode !== 'undefined') {
-                        QRCode.toDataURL(viewLink, { 
-                            width: 400,
-                            height: 400,
-                            margin: 2
-                        }, (error, url) => {
-                            if (error) {
-                                console.error('QR Code download error:', error);
-                                showToast('Failed to generate QR code for download', true);
-                                return;
-                            }
-                            
-                            const link = document.createElement('a');
-                            link.download = `qr-code-${id}.png`;
-                            link.href = url;
-                            link.click();
-                            showToast('QR code downloaded!');
-                        });
-                    } else {
-                        showToast('QR Code library not available', true);
-                    }
-                };
+                generateQRCode(viewLink);
                 
                 // Scroll to results
-                document.getElementById('resultContainer').scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+                setTimeout(() => {
+                    document.getElementById('resultContainer').scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }, 100);
                 
             } catch (error) {
                 console.error('Display result error:', error);
@@ -668,20 +753,81 @@
             }
         }
 
-        // Data export/import
+        function generateQRCode(text) {
+            const qrContainer = document.getElementById('qrcode');
+            if (!qrContainer) return;
+
+            // Clear existing QR code
+            qrContainer.innerHTML = '';
+            
+            if (typeof QRCode !== 'undefined') {
+                try {
+                    console.log('Generating QR code for:', text);
+                    new QRCode(qrContainer, {
+                        text: text,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    
+                    // Setup download functionality
+                    setupQRDownload(text);
+                    console.log("QR Code generated successfully");
+                    
+                } catch (error) {
+                    console.error("QR Code generation error:", error);
+                    qrContainer.innerHTML = '<p style="color: var(--text-secondary);">QR Code generation failed</p>';
+                }
+            } else {
+                console.error("QRCode library not loaded");
+                qrContainer.innerHTML = '<p style="color: var(--text-secondary);">QR Code library not loaded</p>';
+            }
+        }
+
+        function setupQRDownload(text) {
+            const downloadBtn = document.getElementById('downloadQR');
+            if (!downloadBtn) return;
+
+            downloadBtn.onclick = function() {
+                try {
+                    const qrCanvas = document.querySelector('#qrcode canvas');
+                    if (qrCanvas) {
+                        const link = document.createElement('a');
+                        link.download = `qr-code-${Date.now()}.png`;
+                        link.href = qrCanvas.toDataURL();
+                        link.click();
+                        showToast('QR code downloaded!');
+                    } else {
+                        showToast('QR code not found', true);
+                    }
+                } catch (error) {
+                    console.error('QR download error:', error);
+                    showToast('Failed to download QR code', true);
+                }
+            };
+        }
+
+        // Data export/import functions
         function exportData() {
-            const data = getData();
-            const dataStr = JSON.stringify(data, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.download = `portfolio-data-${new Date().toISOString().split('T')[0]}.json`;
-            link.href = url;
-            link.click();
-            
-            URL.revokeObjectURL(url);
-            showToast('Data exported successfully!');
+            try {
+                const data = getData();
+                const dataStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const link = document.createElement('a');
+                link.download = `portfolio-data-${new Date().toISOString().split('T')[0]}.json`;
+                link.href = url;
+                link.click();
+                
+                URL.revokeObjectURL(url);
+                showToast('Data exported successfully!');
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Failed to export data', true);
+            }
         }
 
         function importData(event) {
@@ -694,9 +840,12 @@
                     const importedData = JSON.parse(e.target.result);
                     const currentData = getData();
                     const mergedData = { ...currentData, ...importedData };
-                    saveData(mergedData);
-                    showToast('Data imported successfully!');
+                    
+                    if (saveData(mergedData)) {
+                        showToast('Data imported successfully!');
+                    }
                 } catch (error) {
+                    console.error('Import error:', error);
                     showToast('Invalid JSON file', true);
                 }
             };
@@ -705,34 +854,62 @@
 
         function clearAllData() {
             if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
-                localStorage.removeItem('portfolioData');
-                showToast('All data cleared');
-                location.reload();
+                try {
+                    localStorage.removeItem('portfolioData');
+                    showToast('All data cleared');
+                    setTimeout(() => location.reload(), 1000);
+                } catch (error) {
+                    console.error('Clear data error:', error);
+                    showToast('Failed to clear data', true);
+                }
             }
         }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded'); // Debug log
+        // Initialize application
+        function initializeApp() {
+            console.log('Initializing app...');
+            
+            // Check edit mode
             checkEditMode();
             
-            // Test button click
-            const submitBtn = document.getElementById('submitBtn');
-            if (submitBtn) {
-                console.log('Submit button found');
-                submitBtn.addEventListener('click', function(e) {
-                    console.log('Submit button clicked directly'); // Debug log
-                });
-            } else {
-                console.error('Submit button not found');
-            }
-            
-            // Test form submission
+            // Setup form submission
             const form = document.getElementById('dataForm');
             if (form) {
-                console.log('Form found');
+                // Remove any existing event listeners
+                form.replaceWith(form.cloneNode(true));
+                
+                // Get the new form reference and add event listener
+                const newForm = document.getElementById('dataForm');
+                newForm.addEventListener('submit', handleFormSubmit);
+                console.log('Form event listener attached');
             } else {
                 console.error('Form not found');
+            }
+
+            // Test QRCode library
+            if (typeof QRCode !== 'undefined') {
+                console.log('QRCode library loaded successfully');
+            } else {
+                console.error('QRCode library not loaded');
+            }
+
+            console.log('App initialized successfully');
+        }
+
+        // Wait for DOM and libraries to load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            // Small delay to ensure all libraries are loaded
+            setTimeout(initializeApp, 100);
+        });
+
+        // Fallback initialization
+        window.addEventListener('load', function() {
+            console.log('Window loaded');
+            if (!document.getElementById('dataForm').onsubmit) {
+                console.log('Fallback initialization');
+                initializeApp();
             }
         });
     </script>
