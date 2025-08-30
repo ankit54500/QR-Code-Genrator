@@ -1,23 +1,13 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "**/*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    }
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "view.html", "use": "@vercel/static" },
+    { "src": "admin.html", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/", "dest": "/index.html" },
     { "src": "/view", "dest": "/view.html" },
-    { "src": "/admin", "dest": "/admin.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
-  "functions": {
-    "api/webhook.js": { "maxDuration": 30 },
-    "api/cleanup.js": { "maxDuration": 60 }
-  }
+    { "src": "/admin", "dest": "/admin.html" }
+  ]
 }
