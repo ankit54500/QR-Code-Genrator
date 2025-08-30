@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/view",
+      "dest": "/view.html"
+    }
+  ],
+  "functions": {
+    "api/webhook.js": {
+      "maxDuration": 30
+    },
+    "api/cleanup.js": {
+      "maxDuration": 60
+    }
+  }
+}
