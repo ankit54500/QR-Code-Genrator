@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://i.ibb.co/gZ3ch10d/nw-1-modified.png" type="image/x-icon">
     <title>QR Generator Pro</title>
     
     <!-- Supabase -->
@@ -31,6 +32,7 @@
             --accent-hover: #4f46e5;
             --success: #10b981;
             --premium: #f59e0b;
+            --lifetime: #8b5cf6;
             --border: #374151;
             --shadow: rgba(0, 0, 0, 0.25);
             --error: #ef4444;
@@ -46,6 +48,7 @@
             --accent-hover: #4f46e5;
             --success: #10b981;
             --premium: #f59e0b;
+            --lifetime: #8b5cf6;
             --border: #e2e8f0;
             --shadow: rgba(0, 0, 0, 0.1);
             --error: #ef4444;
@@ -170,6 +173,12 @@
             box-shadow: 0 10px 40px rgba(16, 185, 129, 0.2);
         }
 
+        .plan-lifetime.selected {
+            border-color: var(--lifetime);
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.05));
+            box-shadow: 0 10px 40px rgba(139, 92, 246, 0.2);
+        }
+
         .plan-badge {
             position: absolute;
             top: -12px;
@@ -182,6 +191,11 @@
             font-weight: bold;
             transform: rotate(12deg);
             box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .plan-badge-lifetime {
+            background: var(--lifetime);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
         }
 
         .plan-title {
@@ -247,7 +261,7 @@
             font-size: 1rem;
         }
 
-        .form-group input, .form-group textarea {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%;
             padding: 1rem 1.2rem;
             border: 2px solid var(--border);
@@ -259,7 +273,7 @@
             font-family: inherit;
         }
 
-        .form-group input:focus, .form-group textarea:focus {
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
@@ -269,6 +283,67 @@
         .form-group textarea {
             resize: vertical;
             height: 120px;
+        }
+
+        .qr-customization {
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .qr-customization h3 {
+            color: var(--premium);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .color-picker-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .color-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .color-group label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+
+        .color-picker {
+            height: 50px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .video-section {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .video-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .video-player {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            border-radius: 12px;
+            background: var(--bg-primary);
         }
 
         .btn {
@@ -308,6 +383,14 @@
 
         .btn-premium:hover:not(:disabled) {
             box-shadow: 0 15px 35px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-lifetime {
+            background: linear-gradient(135deg, var(--lifetime), #7c3aed);
+        }
+
+        .btn-lifetime:hover:not(:disabled) {
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.4);
         }
 
         .btn-secondary {
@@ -608,6 +691,10 @@
                 right: 1rem;
                 left: 1rem;
             }
+
+            .color-picker-group {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -643,7 +730,7 @@
                     <div class="plan-option plan-premium" data-plan="premium">
                         <div class="plan-badge">POPULAR</div>
                         <div class="plan-title" style="color: var(--premium);">Premium Plan</div>
-                        <div class="plan-price">₹15</div>
+                        <div class="plan-price">₹50</div>
                         <ul class="plan-features">
                             <li>30 days validity</li>
                             <li>Custom QR styling</li>
@@ -653,6 +740,25 @@
                             <li>Email auto-send</li>
                             <li>PDF download</li>
                             <li>No watermark</li>
+                            <li>Video embedding</li>
+                        </ul>
+                    </div>
+
+                    <div class="plan-option plan-lifetime" data-plan="lifetime">
+                        <div class="plan-badge plan-badge-lifetime">LIFETIME</div>
+                        <div class="plan-title" style="color: var(--lifetime);">Lifetime Plan</div>
+                        <div class="plan-price">₹99</div>
+                        <ul class="plan-features">
+                            <li>Never expires</li>
+                            <li>Premium QR styling</li>
+                            <li>Priority support</li>
+                            <li>Advanced analytics</li>
+                            <li>WhatsApp auto-send</li>
+                            <li>Email auto-send</li>
+                            <li>PDF download</li>
+                            <li>No watermark</li>
+                            <li>Video embedding</li>
+                            <li>Custom branding</li>
                         </ul>
                     </div>
                 </div>
@@ -685,6 +791,37 @@
                     <div class="form-group">
                         <label for="fileUrl">File/Website URL</label>
                         <input type="url" id="fileUrl" name="fileUrl" placeholder="https://example.com/document.pdf">
+                    </div>
+
+                    <div class="form-group" id="videoUrlGroup">
+                        <label for="videoUrl">Video URL (Premium/Lifetime only)</label>
+                        <input type="url" id="videoUrl" name="videoUrl" placeholder="https://youtube.com/watch?v=... or direct video URL" disabled>
+                        <small style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-top: 0.5rem;">
+                            Supports YouTube, Vimeo, or direct video file URLs
+                        </small>
+                    </div>
+
+                    <!-- QR Customization for Premium/Lifetime -->
+                    <div id="qrCustomization" class="qr-customization hidden">
+                        <h3>🎨 Customize Your QR Code</h3>
+                        <div class="color-picker-group">
+                            <div class="color-group">
+                                <label>Foreground Color</label>
+                                <input type="color" id="qrForeground" class="color-picker" value="#000000">
+                            </div>
+                            <div class="color-group">
+                                <label>Background Color</label>
+                                <input type="color" id="qrBackground" class="color-picker" value="#ffffff">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label for="qrStyle">QR Style</label>
+                            <select id="qrStyle" name="qrStyle">
+                                <option value="square">Square (Default)</option>
+                                <option value="round">Rounded Corners</option>
+                                <option value="dot">Dot Style</option>
+                            </select>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn" id="submitBtn">
@@ -731,10 +868,10 @@
     <!-- View Mode -->
     <div id="viewMode" class="hidden">
         <div class="viewer-container">
-            <div id="loadingView" class="loading">
+            <!-- <div id="loadingView" class="loading">
                 <div class="spinner"></div>
                 <p style="color: var(--text-secondary); font-size: 1.2rem;">Loading your entry...</p>
-            </div>
+            </div> -->
 
             <div id="entryContent" class="viewer-card hidden">
                 <div id="planBadge" style="text-align: center; margin-bottom: 1rem;">
@@ -743,6 +880,14 @@
                 
                 <h1 class="entry-title" id="entryTitle"></h1>
                 <div class="entry-description" id="entryDescription"></div>
+                
+                <!-- Video Section -->
+                <div id="videoSection" class="video-section hidden">
+                    <h3 style="margin-bottom: 1rem; color: var(--accent);">🎥 Featured Video</h3>
+                    <div class="video-container">
+                        <div id="videoPlayer"></div>
+                    </div>
+                </div>
                 
                 <div class="entry-meta">
                     <div class="meta-item" id="contactMeta" style="display: none;">
@@ -811,6 +956,11 @@
                         <input type="url" id="editFileUrl" name="fileUrl" placeholder="https://example.com/document.pdf">
                     </div>
 
+                    <div class="form-group">
+                        <label for="editVideoUrl">Video URL</label>
+                        <input type="url" id="editVideoUrl" name="videoUrl" placeholder="https://youtube.com/watch?v=... or direct video URL">
+                    </div>
+
                     <button type="submit" class="btn">Update Entry</button>
                     <button type="button" class="btn btn-secondary" onclick="goHome()" style="margin-top: 1rem;">Cancel</button>
                 </form>
@@ -821,23 +971,32 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // Supabase Configuration (Replace with your actual config)
+        // Supabase Configuration - REPLACE WITH YOUR ACTUAL KEYS
         const SUPABASE_URL = 'https://plrduifpamfthzvxqcpj.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBscmR1aWZwYW1mdGh6dnhxY3BqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1NjEzNzksImV4cCI6MjA3MjEzNzM3OX0.5dO5fO-gunEwO5P4CwCM8bC_EwZdQ2NwrQVB7Fdcz2o';
         
-        // Razorpay Configuration
+        // Razorpay Configuration - REPLACE WITH YOUR LIVE KEY
         const RAZORPAY_KEY = 'rzp_test_XhqXDzHjQhwJsT';
         
         // Initialize Supabase client
         let supabase;
-        if (typeof window.supabase !== 'undefined') {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        try {
+            if (typeof window.supabase !== 'undefined') {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('Supabase client initialized successfully');
+            } else {
+                console.warn('Supabase not loaded, using localStorage fallback');
+            }
+        } catch (error) {
+            console.error('Supabase initialization error:', error);
+            showToast('Database connection failed, using local storage', true);
         }
 
         // Global variables
         let selectedPlan = 'free';
         let currentMode = 'create';
         let currentEntryId = null;
+        let timeUpdateInterval = null;
 
         // Theme Management
         function initTheme() {
@@ -847,7 +1006,11 @@
 
             function setTheme(theme) {
                 document.documentElement.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
+                try {
+                    localStorage.setItem('theme', theme);
+                } catch (e) {
+                    console.warn('localStorage not available for theme');
+                }
                 
                 if (theme === 'light') {
                     themeIcon.textContent = '☀️';
@@ -858,7 +1021,12 @@
                 }
             }
 
-            const savedTheme = localStorage.getItem('theme') || 'dark';
+            let savedTheme = 'dark';
+            try {
+                savedTheme = localStorage.getItem('theme') || 'dark';
+            } catch (e) {
+                console.warn('localStorage not available for theme retrieval');
+            }
             setTheme(savedTheme);
 
             themeToggle.addEventListener('click', () => {
@@ -933,9 +1101,16 @@
             try {
                 const entryId = generateId();
                 const editToken = generateToken();
-                const expiryDays = plan === 'premium' ? 30 : 1;
-                const expiryDate = new Date();
-                expiryDate.setDate(expiryDate.getDate() + expiryDays);
+                
+                let expiryDate = new Date();
+                if (plan === 'lifetime') {
+                    // Set expiry to 100 years from now for lifetime
+                    expiryDate.setFullYear(expiryDate.getFullYear() + 100);
+                } else if (plan === 'premium') {
+                    expiryDate.setDate(expiryDate.getDate() + 30);
+                } else {
+                    expiryDate.setDate(expiryDate.getDate() + 1);
+                }
 
                 const entry = {
                     id: entryId,
@@ -948,19 +1123,31 @@
                 };
 
                 if (supabase) {
+                    console.log('Saving to Supabase:', entry);
                     const { data, error } = await supabase
                         .from('qr_entries')
                         .insert([entry])
                         .select();
 
-                    if (error) throw error;
+                    if (error) {
+                        console.error('Supabase error:', error);
+                        throw new Error('Database save failed: ' + error.message);
+                    }
+                    
+                    console.log('Supabase save successful:', data);
                     return data[0];
                 } else {
+                    console.log('Using localStorage fallback');
                     // Fallback to localStorage for demo
-                    const entries = JSON.parse(localStorage.getItem('qr_entries') || '{}');
-                    entries[entryId] = entry;
-                    localStorage.setItem('qr_entries', JSON.stringify(entries));
-                    return entry;
+                    try {
+                        const entries = JSON.parse(localStorage.getItem('qr_entries') || '{}');
+                        entries[entryId] = entry;
+                        localStorage.setItem('qr_entries', JSON.stringify(entries));
+                        return entry;
+                    } catch (storageError) {
+                        console.error('LocalStorage error:', storageError);
+                        throw new Error('Failed to save entry locally');
+                    }
                 }
             } catch (error) {
                 console.error('Save entry error:', error);
@@ -971,38 +1158,49 @@
         async function getEntry(entryId) {
             try {
                 if (supabase) {
+                    console.log('Fetching from Supabase:', entryId);
                     const { data, error } = await supabase
                         .from('qr_entries')
                         .select('*')
                         .eq('id', entryId)
                         .single();
 
-                    if (error) throw new Error('Entry not found');
-
-                    // Check if expired
-                    const now = new Date();
-                    const expiryDate = new Date(data.expires_at);
-                    
-                    if (now > expiryDate) {
-                        await supabase.from('qr_entries').delete().eq('id', entryId);
-                        throw new Error('Entry has expired');
+                    if (error) {
+                        console.error('Supabase fetch error:', error);
+                        throw new Error('Entry not found in database');
                     }
 
+                    // Check if expired (except for lifetime plans)
+                    if (data.plan !== 'lifetime') {
+                        const now = new Date();
+                        const expiryDate = new Date(data.expires_at);
+                        
+                        if (now > expiryDate) {
+                            await supabase.from('qr_entries').delete().eq('id', entryId);
+                            throw new Error('Entry has expired');
+                        }
+                    }
+
+                    console.log('Supabase fetch successful:', data);
                     return data;
                 } else {
+                    console.log('Using localStorage fallback for fetch');
                     // Fallback to localStorage
                     const entries = JSON.parse(localStorage.getItem('qr_entries') || '{}');
                     const entry = entries[entryId];
                     
                     if (!entry) throw new Error('Entry not found');
                     
-                    const now = new Date();
-                    const expiryDate = new Date(entry.expires_at);
-                    
-                    if (now > expiryDate) {
-                        delete entries[entryId];
-                        localStorage.setItem('qr_entries', JSON.stringify(entries));
-                        throw new Error('Entry has expired');
+                    // Check if expired (except for lifetime plans)
+                    if (entry.plan !== 'lifetime') {
+                        const now = new Date();
+                        const expiryDate = new Date(entry.expires_at);
+                        
+                        if (now > expiryDate) {
+                            delete entries[entryId];
+                            localStorage.setItem('qr_entries', JSON.stringify(entries));
+                            throw new Error('Entry has expired');
+                        }
                     }
                     
                     return entry;
@@ -1047,6 +1245,76 @@
             }
         }
 
+        // Video URL Processing
+        function processVideoUrl(url) {
+            if (!url) return null;
+            
+            // YouTube URL processing
+            if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                let videoId;
+                if (url.includes('youtube.com/watch')) {
+                    videoId = new URL(url).searchParams.get('v');
+                } else if (url.includes('youtu.be/')) {
+                    videoId = url.split('youtu.be/')[1].split('?')[0];
+                }
+                if (videoId) {
+                    return {
+                        type: 'youtube',
+                        id: videoId,
+                        embedUrl: `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`
+                    };
+                }
+            }
+            
+            // Vimeo URL processing
+            if (url.includes('vimeo.com')) {
+                const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
+                if (videoId) {
+                    return {
+                        type: 'vimeo',
+                        id: videoId,
+                        embedUrl: `https://player.vimeo.com/video/${videoId}?autoplay=1&muted=1`
+                    };
+                }
+            }
+            
+            // Direct video URL
+            if (url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
+                return {
+                    type: 'direct',
+                    url: url
+                };
+            }
+            
+            return null;
+        }
+
+        function createVideoPlayer(videoData) {
+            if (!videoData) return '';
+            
+            if (videoData.type === 'youtube' || videoData.type === 'vimeo') {
+                return `<iframe 
+                    src="${videoData.embedUrl}" 
+                    class="video-player"
+                    frameborder="0" 
+                    allow="autoplay; encrypted-media; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>`;
+            } else if (videoData.type === 'direct') {
+                return `<video 
+                    class="video-player" 
+                    controls 
+                    autoplay 
+                    muted 
+                    preload="metadata">
+                    <source src="${videoData.url}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>`;
+            }
+            
+            return '';
+        }
+
         // Payment Integration
         function processPayment(amount, entryData, onSuccess) {
             if (!window.Razorpay) {
@@ -1054,12 +1322,14 @@
                 return;
             }
 
+            const planText = selectedPlan === 'lifetime' ? 'Lifetime Plan - Forever' : 'Premium Plan - 30 Days';
+
             const options = {
                 key: RAZORPAY_KEY,
                 amount: amount * 100, // Convert to paise
                 currency: 'INR',
                 name: 'QR Generator Pro',
-                description: 'Premium Plan - 30 Days',
+                description: planText,
                 handler: function(response) {
                     console.log('Payment successful:', response);
                     onSuccess(response);
@@ -1070,7 +1340,7 @@
                     email: entryData.email || ''
                 },
                 theme: {
-                    color: '#6366f1'
+                    color: selectedPlan === 'lifetime' ? '#8b5cf6' : '#f59e0b'
                 },
                 modal: {
                     ondismiss: function() {
@@ -1086,12 +1356,15 @@
 
         // WhatsApp/Email Auto-send (Premium Feature)
         async function sendAutoNotifications(entry, viewLink, editLink) {
-            if (entry.plan !== 'premium') return;
+            if (entry.plan === 'free') return;
 
-            const message = `🎉 Your Premium QR Entry is ready!
+            const planText = entry.plan === 'lifetime' ? 'Lifetime' : 'Premium';
+            const validityText = entry.plan === 'lifetime' ? 'Never expires' : 'Valid for 30 days';
+
+            const message = `🎉 Your ${planText} QR Entry is ready!
 
 📝 Title: ${entry.title}
-⏰ Valid for: 30 days
+⏰ ${validityText}
 🔗 View Link: ${viewLink}
 ✏️ Edit Link: ${editLink}
 
@@ -1102,9 +1375,6 @@ Generated by QR Generator Pro`;
                 const whatsappUrl = `https://wa.me/${entry.number.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
             }
-
-            // Email (if email provided) - This would need backend service
-            // For now, we'll show the share buttons
         }
 
         // Plan Selection
@@ -1119,6 +1389,7 @@ Generated by QR Generator Pro`;
                     
                     selectedPlan = option.dataset.plan;
                     updatePlanInfo();
+                    updateFormElements();
                 });
             });
         }
@@ -1132,15 +1403,34 @@ Generated by QR Generator Pro`;
                 planInfo.innerHTML = '<strong>Selected:</strong> Free Plan (24 hours validity)';
                 submitText.textContent = 'Create Free Entry';
                 submitBtn.className = 'btn';
-            } else {
+            } else if (selectedPlan === 'premium') {
                 planInfo.innerHTML = '<strong>Selected:</strong> Premium Plan (30 days validity + Premium Features)';
-                submitText.textContent = 'Create Premium Entry (₹15)';
+                submitText.textContent = 'Create Premium Entry (₹50)';
                 submitBtn.className = 'btn btn-premium';
+            } else {
+                planInfo.innerHTML = '<strong>Selected:</strong> Lifetime Plan (Never expires + All Features)';
+                submitText.textContent = 'Create Lifetime Entry (₹99)';
+                submitBtn.className = 'btn btn-lifetime';
             }
         }
 
-        // QR Code Generation
-        function generateQRCode(text, isPremium = false) {
+        function updateFormElements() {
+            const qrCustomization = document.getElementById('qrCustomization');
+            const videoUrlInput = document.getElementById('videoUrl');
+            
+            if (selectedPlan === 'free') {
+                qrCustomization.classList.add('hidden');
+                videoUrlInput.disabled = true;
+                videoUrlInput.placeholder = 'Video embedding available in Premium/Lifetime plans';
+            } else {
+                qrCustomization.classList.remove('hidden');
+                videoUrlInput.disabled = false;
+                videoUrlInput.placeholder = 'https://youtube.com/watch?v=... or direct video URL';
+            }
+        }
+
+        // QR Code Generation with Custom Styling
+        function generateQRCode(text, plan = 'free', customization = {}) {
             const qrContainer = document.getElementById('qrcode');
             qrContainer.innerHTML = '';
 
@@ -1151,32 +1441,64 @@ Generated by QR Generator Pro`;
                 
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                const size = isPremium ? 250 : 200;
+                const size = plan !== 'free' ? 300 : 200;
                 const moduleSize = size / qr.getModuleCount();
+                const padding = 20;
                 
-                canvas.width = size;
-                canvas.height = size;
+                canvas.width = size + (padding * 2);
+                canvas.height = size + (padding * 2);
                 
                 // Background
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, size, size);
+                const bgColor = customization.backgroundColor || '#ffffff';
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // QR modules with custom color for premium
-                ctx.fillStyle = isPremium ? '#6366f1' : '#000000';
+                // QR modules with custom styling
+                const fgColor = customization.foregroundColor || (plan !== 'free' ? '#6366f1' : '#000000');
+                const style = customization.style || 'square';
+                
+                ctx.fillStyle = fgColor;
+                
                 for (let row = 0; row < qr.getModuleCount(); row++) {
                     for (let col = 0; col < qr.getModuleCount(); col++) {
                         if (qr.isDark(row, col)) {
-                            ctx.fillRect(col * moduleSize, row * moduleSize, moduleSize, moduleSize);
+                            const x = (col * moduleSize) + padding;
+                            const y = (row * moduleSize) + padding;
+                            
+                            if (style === 'round') {
+                                ctx.beginPath();
+                                ctx.arc(x + moduleSize/2, y + moduleSize/2, moduleSize/2 * 0.8, 0, 2 * Math.PI);
+                                ctx.fill();
+                            } else if (style === 'dot') {
+                                ctx.beginPath();
+                                ctx.arc(x + moduleSize/2, y + moduleSize/2, moduleSize/3, 0, 2 * Math.PI);
+                                ctx.fill();
+                            } else {
+                                // Square with optional rounded corners
+                                if (plan !== 'free') {
+                                    const radius = moduleSize * 0.1;
+                                    ctx.beginPath();
+                                    ctx.roundRect(x, y, moduleSize, moduleSize, radius);
+                                    ctx.fill();
+                                } else {
+                                    ctx.fillRect(x, y, moduleSize, moduleSize);
+                                }
+                            }
                         }
                     }
                 }
                 
-                // Add premium watermark
-                if (isPremium) {
+                // Add plan watermark
+                if (plan === 'premium') {
                     ctx.fillStyle = '#f59e0b';
-                    ctx.font = 'bold 12px Arial';
+                    ctx.font = 'bold 14px Arial';
                     ctx.textAlign = 'center';
-                    ctx.fillText('PREMIUM', size / 2, size - 10);
+                    ctx.fillText('PREMIUM', canvas.width / 2, canvas.height - 8);
+                } else if (plan === 'lifetime') {
+                    ctx.fillStyle = '#8b5cf6';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('LIFETIME', canvas.width / 2, canvas.height - 8);
                 }
                 
                 qrContainer.appendChild(canvas);
@@ -1215,8 +1537,18 @@ Generated by QR Generator Pro`;
                     title: formData.get('title').trim(),
                     description: formData.get('description').trim(),
                     number: formData.get('number')?.trim() || null,
-                    fileUrl: formData.get('fileUrl')?.trim() || null
+                    fileUrl: formData.get('fileUrl')?.trim() || null,
+                    videoUrl: formData.get('videoUrl')?.trim() || null
                 };
+
+                // Add QR customization for premium/lifetime plans
+                if (selectedPlan !== 'free') {
+                    entryData.qrCustomization = {
+                        foregroundColor: document.getElementById('qrForeground').value,
+                        backgroundColor: document.getElementById('qrBackground').value,
+                        style: document.getElementById('qrStyle').value
+                    };
+                }
 
                 // Validation
                 if (!entryData.title || !entryData.description) {
@@ -1224,13 +1556,21 @@ Generated by QR Generator Pro`;
                 }
 
                 if (entryData.fileUrl && !isValidUrl(entryData.fileUrl)) {
-                    throw new Error('Please enter a valid URL');
+                    throw new Error('Please enter a valid file URL');
                 }
 
-                // Process payment for premium
+                if (entryData.videoUrl && !isValidUrl(entryData.videoUrl)) {
+                    throw new Error('Please enter a valid video URL');
+                }
+
+                // Process payment for premium/lifetime
                 if (selectedPlan === 'premium') {
-                    processPayment(15, entryData, async (paymentResponse) => {
+                    processPayment(50, entryData, async (paymentResponse) => {
                         await createEntry(entryData, 'premium', paymentResponse);
+                    });
+                } else if (selectedPlan === 'lifetime') {
+                    processPayment(99, entryData, async (paymentResponse) => {
+                        await createEntry(entryData, 'lifetime', paymentResponse);
                     });
                 } else {
                     await createEntry(entryData, 'free');
@@ -1252,8 +1592,8 @@ Generated by QR Generator Pro`;
                 // Display results
                 displayResult(savedEntry);
                 
-                // Send notifications for premium
-                if (plan === 'premium') {
+                // Send notifications for premium/lifetime
+                if (plan !== 'free') {
                     const baseUrl = window.location.origin + window.location.pathname;
                     const viewLink = `${baseUrl}?id=${savedEntry.id}`;
                     const editLink = `${baseUrl}?edit=${savedEntry.id}&token=${savedEntry.edit_token}`;
@@ -1262,8 +1602,10 @@ Generated by QR Generator Pro`;
                 
                 // Clear form
                 document.getElementById('dataForm').reset();
+                updateFormElements(); // Reset customization visibility
                 
-                showToast(plan === 'premium' ? 'Premium entry created successfully! 🎉' : 'Free entry created successfully! ✅');
+                const planText = plan === 'lifetime' ? 'Lifetime' : (plan === 'premium' ? 'Premium' : 'Free');
+                showToast(`${planText} entry created successfully! 🎉`);
 
             } catch (error) {
                 console.error('Create entry error:', error);
@@ -1298,19 +1640,28 @@ Generated by QR Generator Pro`;
             document.getElementById('editLink').textContent = editLink;
             document.getElementById('resultContainer').classList.remove('hidden');
 
-            // Generate QR Code
-            generateQRCode(viewLink, entry.plan === 'premium');
+            // Generate QR Code with customization
+            const customization = entry.qrCustomization || {};
+            generateQRCode(viewLink, entry.plan, customization);
             
             // Setup share buttons
             setupShareButtons(entry.title, viewLink, editLink);
             
             // Show expiry info
             const expiryDate = new Date(entry.expires_at);
-            const expiryText = entry.plan === 'premium' ? '30 days' : '24 hours';
+            let expiryText;
+            if (entry.plan === 'lifetime') {
+                expiryText = 'Never expires';
+            } else if (entry.plan === 'premium') {
+                expiryText = '30 days';
+            } else {
+                expiryText = '24 hours';
+            }
+            
             document.getElementById('expiryInfo').innerHTML = `
-                <strong>⏰ Link expires in ${expiryText}</strong><br>
+                <strong>⏰ ${entry.plan === 'lifetime' ? 'Link never expires!' : `Link expires in ${expiryText}`}</strong><br>
                 <span style="font-size: 0.9rem; color: var(--text-secondary);">
-                    Expires on: ${expiryDate.toLocaleDateString()} at ${expiryDate.toLocaleTimeString()}
+                    ${entry.plan === 'lifetime' ? 'Lifetime access guaranteed' : `Expires on: ${expiryDate.toLocaleDateString()} at ${expiryDate.toLocaleTimeString()}`}
                 </span>
             `;
 
@@ -1347,7 +1698,8 @@ Generated by QR Generator Pro`;
                     title: formData.get('title').trim(),
                     description: formData.get('description').trim(),
                     number: formData.get('number')?.trim() || null,
-                    fileUrl: formData.get('fileUrl')?.trim() || null
+                    fileUrl: formData.get('fileUrl')?.trim() || null,
+                    videoUrl: formData.get('videoUrl')?.trim() || null
                 };
 
                 const urlParams = new URLSearchParams(window.location.search);
@@ -1382,6 +1734,12 @@ Generated by QR Generator Pro`;
             });
             document.getElementById(mode).classList.remove('hidden');
             currentMode = mode;
+            
+            // Clear any existing intervals
+            if (timeUpdateInterval) {
+                clearInterval(timeUpdateInterval);
+                timeUpdateInterval = null;
+            }
         }
 
         // View Mode Functions
@@ -1392,7 +1750,16 @@ Generated by QR Generator Pro`;
                 document.getElementById('entryContent').classList.add('hidden');
                 document.getElementById('errorContent').classList.add('hidden');
 
-                const entry = await getEntry(entryId);
+                console.log('Loading entry:', entryId);
+                
+                // Add timeout to prevent infinite loading
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Loading timeout')), 10000)
+                );
+                
+                const entry = await Promise.race([getEntry(entryId), timeoutPromise]);
+                console.log('Entry loaded successfully:', entry);
+                
                 displayViewMode(entry);
                 
             } catch (error) {
@@ -1409,18 +1776,36 @@ Generated by QR Generator Pro`;
             const planBadge = document.getElementById('planBadge');
             if (entry.plan === 'premium') {
                 planBadge.innerHTML = '<span style="background: var(--premium); color: var(--bg-primary); padding: 0.5rem 1.5rem; border-radius: 25px; font-weight: 600;">Premium Plan</span>';
+            } else if (entry.plan === 'lifetime') {
+                planBadge.innerHTML = '<span style="background: var(--lifetime); color: white; padding: 0.5rem 1.5rem; border-radius: 25px; font-weight: 600;">Lifetime Plan</span>';
             }
             
             // Fill content
             document.getElementById('entryTitle').textContent = entry.title;
             document.getElementById('entryDescription').textContent = entry.description;
             document.getElementById('entryCreated').textContent = new Date(entry.created_at).toLocaleDateString();
-            document.getElementById('entryExpires').textContent = new Date(entry.expires_at).toLocaleDateString();
+            
+            // Handle expiry display
+            if (entry.plan === 'lifetime') {
+                document.getElementById('entryExpires').textContent = 'Never';
+            } else {
+                document.getElementById('entryExpires').textContent = new Date(entry.expires_at).toLocaleDateString();
+            }
             
             // Contact info
             if (entry.number) {
                 document.getElementById('entryContact').textContent = entry.number;
                 document.getElementById('contactMeta').style.display = 'block';
+            }
+
+            // Video section
+            if (entry.videoUrl && (entry.plan === 'premium' || entry.plan === 'lifetime')) {
+                const videoData = processVideoUrl(entry.videoUrl);
+                if (videoData) {
+                    const videoPlayer = createVideoPlayer(videoData);
+                    document.getElementById('videoPlayer').innerHTML = videoPlayer;
+                    document.getElementById('videoSection').classList.remove('hidden');
+                }
             }
 
             // File link
@@ -1429,7 +1814,21 @@ Generated by QR Generator Pro`;
                 document.getElementById('fileSection').classList.remove('hidden');
             }
 
-            // Time remaining
+            // Time remaining with live updates
+            updateTimeRemaining(entry);
+            
+            // Update time every minute for non-lifetime plans
+            if (entry.plan !== 'lifetime') {
+                timeUpdateInterval = setInterval(() => updateTimeRemaining(entry), 60000);
+            }
+        }
+
+        function updateTimeRemaining(entry) {
+            if (entry.plan === 'lifetime') {
+                document.getElementById('timeRemaining').textContent = 'Forever';
+                return;
+            }
+            
             const expiryDate = new Date(entry.expires_at);
             const now = new Date();
             const timeLeft = expiryDate.getTime() - now.getTime();
@@ -1446,6 +1845,10 @@ Generated by QR Generator Pro`;
                 } else {
                     timeText = `${minutesLeft}m left`;
                 }
+            } else {
+                // Entry expired, show message
+                timeText = 'Expired';
+                showToast('This entry has expired', true);
             }
             
             document.getElementById('timeRemaining').textContent = timeText;
@@ -1474,6 +1877,7 @@ Generated by QR Generator Pro`;
                 document.getElementById('editDescription').value = entry.description || '';
                 document.getElementById('editNumber').value = entry.number || '';
                 document.getElementById('editFileUrl').value = entry.fileUrl || '';
+                document.getElementById('editVideoUrl').value = entry.videoUrl || '';
                 
             } catch (error) {
                 console.error('Edit mode error:', error);
@@ -1489,6 +1893,8 @@ Generated by QR Generator Pro`;
             const editId = urlParams.get('edit');
             const editToken = urlParams.get('token');
 
+            console.log('Route check:', { entryId, editId, editToken });
+
             if (editId && editToken) {
                 loadEditMode(editId, editToken);
             } else if (entryId) {
@@ -1502,20 +1908,28 @@ Generated by QR Generator Pro`;
         function initializeApp() {
             console.log('Initializing QR Generator Pro...');
             
-            // Initialize theme
-            initTheme();
-            
-            // Initialize plan selection
-            initPlanSelection();
-            
-            // Setup form submissions
-            document.getElementById('dataForm').addEventListener('submit', handleFormSubmit);
-            document.getElementById('editForm').addEventListener('submit', handleEditSubmit);
-            
-            // Check route and show appropriate mode
-            checkRoute();
-            
-            console.log('App initialized successfully');
+            try {
+                // Initialize theme
+                initTheme();
+                
+                // Initialize plan selection
+                initPlanSelection();
+                
+                // Setup form submissions
+                document.getElementById('dataForm').addEventListener('submit', handleFormSubmit);
+                document.getElementById('editForm').addEventListener('submit', handleEditSubmit);
+                
+                // Update form elements based on initial plan
+                updateFormElements();
+                
+                // Check route and show appropriate mode
+                checkRoute();
+                
+                console.log('App initialized successfully');
+            } catch (error) {
+                console.error('App initialization error:', error);
+                showToast('App initialization failed', true);
+            }
         }
 
         // Auto-cleanup expired entries (runs every hour)
@@ -1523,50 +1937,140 @@ Generated by QR Generator Pro`;
             try {
                 if (supabase) {
                     const now = new Date().toISOString();
-                    await supabase
+                    const { data, error } = await supabase
                         .from('qr_entries')
                         .delete()
+                        .neq('plan', 'lifetime') // Don't delete lifetime entries
                         .lt('expires_at', now);
+                        
+                    if (!error) {
+                        console.log('Cleanup completed:', data?.length || 0, 'entries deleted');
+                    }
                 } else {
                     // Cleanup localStorage
-                    const entries = JSON.parse(localStorage.getItem('qr_entries') || '{}');
-                    const now = new Date();
-                    let cleaned = false;
+                    try {
+                        const entries = JSON.parse(localStorage.getItem('qr_entries') || '{}');
+                        const now = new Date();
+                        let cleaned = false;
 
-                    Object.keys(entries).forEach(id => {
-                        const entry = entries[id];
-                        const expiryDate = new Date(entry.expires_at);
-                        
-                        if (now > expiryDate) {
-                            delete entries[id];
-                            cleaned = true;
+                        Object.keys(entries).forEach(id => {
+                            const entry = entries[id];
+                            if (entry.plan !== 'lifetime') {
+                                const expiryDate = new Date(entry.expires_at);
+                                
+                                if (now > expiryDate) {
+                                    delete entries[id];
+                                    cleaned = true;
+                                }
+                            }
+                        });
+
+                        if (cleaned) {
+                            localStorage.setItem('qr_entries', JSON.stringify(entries));
                         }
-                    });
-
-                    if (cleaned) {
-                        localStorage.setItem('qr_entries', JSON.stringify(entries));
+                    } catch (e) {
+                        console.warn('LocalStorage cleanup failed');
                     }
                 }
                 
-                console.log('Cleanup completed');
             } catch (error) {
                 console.error('Cleanup error:', error);
             }
         }
 
+        // Polyfill for roundRect (for older browsers)
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+
+        // Connection test function
+        async function testDatabaseConnection() {
+            try {
+                if (supabase) {
+                    // Simple connection test
+                    const { data, error } = await supabase
+                        .from('qr_entries')
+                        .select('count')
+                        .limit(1);
+                    
+                    if (error) {
+                        console.error('Database connection test failed:', error);
+                        showToast('Database connection failed, using local storage', true);
+                        return false;
+                    } else {
+                        console.log('Database connection successful');
+                        showToast('Connected to database successfully');
+                        return true;
+                    }
+                } else {
+                    console.warn('Supabase client not available');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Database test error:', error);
+                showToast('Database connection failed', true);
+                return false;
+            }
+        }
+
         // Wait for DOM to load
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(initializeApp, 500);
+            console.log('DOM loaded, initializing app...');
+            
+            // Small delay to ensure all scripts are loaded
+            setTimeout(async () => {
+                try {
+                    // Test database connection first
+                    await testDatabaseConnection();
+                    
+                    // Initialize app
+                    initializeApp();
+                } catch (error) {
+                    console.error('Failed to initialize app:', error);
+                    showToast('Failed to initialize application', true);
+                }
+            }, 1000);
             
             // Run cleanup every hour
             setInterval(cleanupExpiredEntries, 60 * 60 * 1000);
             
-            // Run initial cleanup
-            cleanupExpiredEntries();
+            // Run initial cleanup after 10 seconds
+            setTimeout(cleanupExpiredEntries, 10000);
         });
 
         // Handle navigation
         window.addEventListener('popstate', checkRoute);
+
+        // Add error handling for uncaught errors
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            showToast('An unexpected error occurred', true);
+        });
+
+        // Add unhandled promise rejection handling
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled promise rejection:', e.reason);
+            showToast('An unexpected error occurred', true);
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (timeUpdateInterval) {
+                clearInterval(timeUpdateInterval);
+            }
+        });
     </script>
 </body>
 </html>
