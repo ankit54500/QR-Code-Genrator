@@ -1,0 +1,17 @@
+{
+  "name": "qr-generator-pro",
+  "version": "1.0.0",
+  "description": "Professional QR Code Generator with Premium Features",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static build'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0"
+  },
+  "keywords": ["qr", "generator", "premium", "links"],
+  "author": "Your Name",
+  "license": "MIT"
+}
