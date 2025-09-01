@@ -21,12 +21,6 @@
     "SUPABASE_SERVICE_KEY": "@supabase_service_key",
     "RAZORPAY_KEY": "@razorpay_key",
     "RAZORPAY_WEBHOOK_SECRET": "@razorpay_webhook_secret"
-  },
-  "crons": [
-    {
-      "path": "/api/cleanup",
-      "schedule": "0 */6 * * *"
-    }
-  ]
+  }
 }
 
